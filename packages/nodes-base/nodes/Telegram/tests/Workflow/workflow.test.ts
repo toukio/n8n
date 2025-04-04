@@ -1,7 +1,7 @@
 import nock from 'nock';
-import { FAKE_CREDENTIALS_DATA } from '../../../../test/nodes/FakeCredentialsMap';
 
-import { getWorkflowFilenames, testWorkflows } from '../../../../test/nodes/Helpers';
+import { FAKE_CREDENTIALS_DATA } from '@test/nodes/FakeCredentialsMap';
+import { getWorkflowFilenames, testWorkflows } from '@test/nodes/Helpers';
 
 import {
 	getChatResponse,
@@ -20,8 +20,6 @@ import {
 describe('Telegram', () => {
 	describe('Run Telegram workflow', () => {
 		beforeAll(() => {
-			nock.disableNetConnect();
-
 			const { baseUrl } = FAKE_CREDENTIALS_DATA.telegramApi;
 			const mock = nock(baseUrl);
 
@@ -42,10 +40,6 @@ describe('Telegram', () => {
 			mock.post('/bottestToken/sendAnimation').reply(200, sendAnimationMessageResponse);
 			mock.post('/bottestToken/sendAudio').reply(200, sendAudioResponse);
 			mock.post('/bottestToken/getChatMember').reply(200, getMemberResponse);
-		});
-
-		afterAll(() => {
-			nock.restore();
 		});
 
 		const workflows = getWorkflowFilenames(__dirname);
