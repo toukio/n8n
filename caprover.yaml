@@ -1,0 +1,53 @@
+captainVersion: 4
+services:
+  # worker service
+  $$cap_appname-worker:
+    image: 892384308075.dkr.ecr.us-east-1.amazonaws.com/tkhubai/kit_ai_n8n_worker:latest
+    restart: always
+    environment:
+      DB_POSTGRESDB_HOST: srv-captain--kit-$$cap_n8n-prefix-postgressql
+      QUEUE_BULL_REDIS_HOST: srv-captain--kit-$$cap_n8n-prefix-redis
+      WEBHOOK_URL: https://$$cap_appname.a2.hubai.touk.io
+      N8N_SMTP_USER: 'AKIA47RR75NVZ3WG4TVM'
+      N8N_SMTP_PASS: 'BJ8v0KGVTNCNdE6RCK34Ro+Pof5EScDqak7JThX4P3z9'
+      N8N_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
+      N8N_SMTP_PORT: '587'
+      N8N_SMTP_SENDER: 'suporte@hubai.touk.io'
+    volumes:
+      - $$cap_appname-storage:/home/node/.n8n
+    caproverExtra:
+      notExposeAsWebApp: 'true'
+
+  # The nginx reverse proxy.
+  # used for reverse proxying the API service and Web service.
+  $$cap_appname:
+    image: 892384308075.dkr.ecr.us-east-1.amazonaws.com/tkhubai/kit_ai_n8n:latest
+    restart: always
+    environment:
+      DB_POSTGRESDB_HOST: srv-captain--kit-$$cap_n8n-prefix-postgressql
+      QUEUE_BULL_REDIS_HOST: srv-captain--kit-$$cap_n8n-prefix-redis
+      WEBHOOK_URL: https://$$cap_appname.a2.hubai.touk.io
+      N8N_SMTP_USER: 'AKIA47RR75NVZ3WG4TVM'
+      N8N_SMTP_PASS: 'BJ8v0KGVTNCNdE6RCK34Ro+Pof5EScDqak7JThX4P3z9'
+      N8N_SMTP_HOST: 'email-smtp.us-east-1.amazonaws.com'
+      N8N_SMTP_PORT: '587'
+      N8N_SMTP_SENDER: 'suporte@hubai.touk.io'
+    volumes:
+      - $$cap_appname-storage:/home/node/.n8n
+    depends_on:
+      - $$cap_appname-worker
+    caproverExtra:
+      containerHttpPort: '5678'
+caproverOneClickApp:
+  variables:
+    - id: $$cap_n8n-prefix
+      label: Prefixo do App
+      defaultValue: abcd12
+      description: "O prefixo representa conta do tkhubai. Exemplo: abcd12 (5 caracteres com letras minúsculas e números)."
+      validRegex: /^[a-z0-9]{5}$/
+  instructions:
+      start: Configure o N8N para o TKHubAI adicionando o prefixo da conta consumidora.
+      end: N8N is deployed and available.
+  displayName: N8N customized by Toukio for TKHubAI
+  description: O n8n é uma plataforma de automação de workflows de código aberto, projetada para integrar aplicativos, serviços e APIs de forma flexível e eficiente. Com uma interface intuitiva e baseada em nós, o n8n permite que usuários criem automações complexas sem necessidade de codificação extensiva, sendo ideal para desenvolvedores e equipes que buscam otimizar processos e melhorar a produtividade. Sua natureza extensível e comunitária facilita a personalização e a adaptação a diversas necessidades.
+  documentation: https://docs.n8n.io/hosting/
